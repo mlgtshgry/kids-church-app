@@ -1,0 +1,174 @@
+/* Gamification - Flashy Styles */
+
+/* 1. Force 3-Column Grid */
+.trophy-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    padding: 16px !important;
+}
+
+/* 2. Trophy Card Base */
+.trophy-card {
+    background: #fff;
+    border: 1px solid #F3F4F6;
+    border-radius: 16px;
+    padding: 12px 4px !important;
+    /* Compacter padding for grid */
+    text-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    opacity: 0.6;
+    filter: grayscale(1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Base elements */
+.trophy-icon {
+    font-size: 28px !important;
+    margin-bottom: 6px !important;
+    display: block;
+    z-index: 2;
+    position: relative;
+}
+
+.trophy-title {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    color: #1F2937;
+    line-height: 1.2;
+    margin-bottom: 2px !important;
+    z-index: 2;
+    position: relative;
+}
+
+.trophy-desc {
+    font-size: 9px !important;
+    color: #4B5563;
+    z-index: 2;
+    position: relative;
+}
+
+
+/* 3. Unlocked State */
+.trophy-card.unlocked {
+    opacity: 1 !important;
+    filter: grayscale(0) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 4. Metallic Ranks */
+
+/* Bronze */
+.rank-bronze {
+    border: 2px solid #92400E !important;
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+}
+
+.rank-bronze .trophy-icon {
+    color: #92400E !important;
+}
+
+.rank-bronze .trophy-title {
+    color: #78350F !important;
+}
+
+.rank-bronze .trophy-desc {
+    color: #92400E !important;
+}
+
+/* Silver */
+.rank-silver {
+    border: 2px solid #94A3B8 !important;
+    background: linear-gradient(135deg, #F8FAFC 0%, #CBD5E1 100%) !important;
+}
+
+.rank-silver .trophy-icon {
+    color: #475569 !important;
+}
+
+.rank-silver .trophy-title {
+    color: #334155 !important;
+}
+
+.rank-silver .trophy-desc {
+    color: #475569 !important;
+}
+
+/* GOLD (Flashy!) */
+.rank-gold {
+    border: 2px solid #F59E0B !important;
+    background: linear-gradient(135deg, #FFF7ED 0%, #FCD34D 100%) !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3) !important;
+}
+
+.rank-gold .trophy-icon {
+    color: #B45309 !important;
+}
+
+.rank-gold .trophy-title {
+    color: #78350F !important;
+    font-weight: 900 !important;
+}
+
+.rank-gold .trophy-desc {
+    color: #92400E !important;
+}
+
+/* 5. Sparkle Animation */
+.rank-gold::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(to bottom right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.8) 50%,
+            rgba(255, 255, 255, 0) 60%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+
+    20% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+/* Pulsing Border for Today's Attendance */
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.pulsing-border {
+    animation: pulse-green 2s infinite;
+}
