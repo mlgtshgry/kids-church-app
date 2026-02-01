@@ -455,39 +455,16 @@ body {
   animation: fadeIn 0.2s;
 }
 
-.modal {
+.modal-content {
   background: #fff;
   width: 90%;
   max-width: 320px;
   padding: 24px;
   border-radius: 20px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: scaleUp 0.2s;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s;
-}
-
-.modal {
-  background: #fff;
-  width: 90%;
-  max-width: 320px;
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: scaleUp 0.2s;
+  animation: scaleUp 0.1s ease-out;
+  /* Faster animation */
+  position: relative;
 }
 
 /* Profile Styles */
@@ -768,4 +745,66 @@ body {
   font-weight: 600;
   color: var(--text-muted);
   text-align: center;
+}
+
+
+/* QR Scanner Overrides */
+#reader {
+  border: none !important;
+  font-family: var(--font-family) !important;
+  /* background: #000; Removed to match card style */
+}
+
+#reader__dashboard_section_csr span {
+  display: none !important;
+  /* Hide "Request Camera Permissions" text if it duplicates */
+}
+
+#reader video {
+  width: 100% !important;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* The Camera Select Dropdown */
+#reader select {
+  width: 100% !important;
+  padding: 12px !important;
+  margin-bottom: 12px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-family: var(--font-family) !important;
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* Any button inside the scanner (Start/Stop) */
+#reader button {
+  background: var(--primary) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 12px 24px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  margin-top: 8px !important;
+  width: 100% !important;
+  /* Full width buttons look better on mobile */
+}
+
+/* The "Stop Scanning" button specifically usually needs less emphasis? 
+   Actually, let's keep it consistent. */
+
+#reader__dashboard_section_swaplink {
+  display: none !important;
+}
+
+#reader__status_span {
+  display: none !important;
+}
+
+#reader__scan_region img {
+  display: none !important;
 }
