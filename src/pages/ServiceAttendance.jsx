@@ -6,7 +6,13 @@ export default function ServiceAttendance({ onBack }) {
     const [searchTerm, setSearchTerm] = useState('')
     const [members, setMembers] = useState([])
     const [loading, setLoading] = useState(true)
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const [selectedDate, setSelectedDate] = useState(() => {
+        const d = new Date()
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    })
     const [serviceType, setServiceType] = useState('MORNING_SERVICE')
 
     useEffect(() => {

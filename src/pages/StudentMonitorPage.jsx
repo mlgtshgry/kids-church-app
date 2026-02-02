@@ -103,7 +103,14 @@ function StudentProfile({ student, onBack }) {
     }
 
     // Check if attended today
-    const todayStr = new Date().toISOString().split('T')[0]
+    const getLocalDateIndex = () => {
+        const d = new Date()
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+    const todayStr = getLocalDateIndex()
     const hasAttendedToday = history.some(h => h.date === todayStr) || (student.isDemo && student.demoHistory.some(h => h.date === todayStr))
 
     const [showQR, setShowQR] = useState(false)
@@ -215,7 +222,15 @@ export default function StudentMonitorPage({ onBack }) {
         isDemo: true,
         demoStats: { total: 15, verses: 12, streak: 5 },
         demoHistory: [
-            { date: new Date().toISOString().split('T')[0], memory_verse: true, remarks: 'Present today!' },
+            {
+                date: (() => {
+                    const d = new Date()
+                    const year = d.getFullYear()
+                    const month = String(d.getMonth() + 1).padStart(2, '0')
+                    const day = String(d.getDate()).padStart(2, '0')
+                    return `${year}-${month}-${day}`
+                })(), memory_verse: true, remarks: 'Present today!'
+            },
             { date: '2023-10-27', memory_verse: true, remarks: 'Led the prayer' },
             { date: '2023-10-20', memory_verse: true, remarks: '' },
             { date: '2023-10-13', memory_verse: false, remarks: 'Brought a friend' }
@@ -238,7 +253,14 @@ export default function StudentMonitorPage({ onBack }) {
 
     async function fetchTodayAttendance() {
         try {
-            const today = new Date().toISOString().split('T')[0]
+            const getLocalDateIndex = () => {
+                const d = new Date()
+                const year = d.getFullYear()
+                const month = String(d.getMonth() + 1).padStart(2, '0')
+                const day = String(d.getDate()).padStart(2, '0')
+                return `${year}-${month}-${day}`
+            }
+            const today = getLocalDateIndex()
             const { data } = await supabase.from('attendance').select('student_id').eq('date', today).eq('status', 'PRESENT')
             if (data) {
                 setPresentIds(new Set(data.map(r => r.student_id)))

@@ -65,7 +65,14 @@ export default function AttendancePage({ onBack }) {
             const { data: studentData, error: studentError } = await supabase.from('students').select('*').order('full_name')
             if (studentError) throw studentError
 
-            const today = new Date().toISOString().split('T')[0]
+            const getLocalDateIndex = () => {
+                const d = new Date()
+                const year = d.getFullYear()
+                const month = String(d.getMonth() + 1).padStart(2, '0')
+                const day = String(d.getDate()).padStart(2, '0')
+                return `${year}-${month}-${day}`
+            }
+            const today = getLocalDateIndex()
             // Fetch all attendance for today including remarks/verse
             const { data: todayData, error: todayError } = await supabase
                 .from('attendance')
@@ -107,7 +114,14 @@ export default function AttendancePage({ onBack }) {
         if (!supabase) return
         const newStatus = !student.present
         const newVisits = newStatus ? student.visits + 1 : student.visits - 1
-        const today = new Date().toISOString().split('T')[0]
+        const getLocalDateIndex = () => {
+            const d = new Date()
+            const year = d.getFullYear()
+            const month = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}`
+        }
+        const today = getLocalDateIndex()
 
         // Optimistic Update
         setStudents(prev => prev.map(s => s.id === student.id ? { ...s, present: newStatus } : s))
@@ -130,7 +144,14 @@ export default function AttendancePage({ onBack }) {
         const newVal = !student.memory_verse
         setStudents(prev => prev.map(s => s.id === student.id ? { ...s, memory_verse: newVal } : s))
 
-        const today = new Date().toISOString().split('T')[0]
+        const getLocalDateIndex = () => {
+            const d = new Date()
+            const year = d.getFullYear()
+            const month = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}`
+        }
+        const today = getLocalDateIndex()
         await supabase.from('attendance').update({ memory_verse: newVal }).eq('student_id', student.id).eq('date', today)
     }
 
@@ -142,7 +163,14 @@ export default function AttendancePage({ onBack }) {
     }
 
     const saveRemark = async (text) => {
-        const today = new Date().toISOString().split('T')[0]
+        const getLocalDateIndex = () => {
+            const d = new Date()
+            const year = d.getFullYear()
+            const month = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}`
+        }
+        const today = getLocalDateIndex()
         const sid = remarkModal.studentId
 
         // Update local
