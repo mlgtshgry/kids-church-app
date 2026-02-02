@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Search, CheckCircle, Calendar, Users } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, Calendar, Users, Lock, Unlock, Filter } from 'lucide-react'
 import { supabase } from '../supabase'
 
 export default function ServiceAttendance({ onBack }) {
@@ -13,11 +13,18 @@ export default function ServiceAttendance({ onBack }) {
         const day = String(d.getDate()).padStart(2, '0')
         return `${year}-${month}-${day}`
     })
-    const [serviceType, setServiceType] = useState('MORNING_SERVICE')
+
+    const [isDateLocked, setIsDateLocked] = useState(true)
+    // Removed Service & Ministry State/Filters as requested
 
     useEffect(() => {
         fetchMembersAndAttendance()
-    }, [selectedDate, serviceType])
+    }, [selectedDate]) // Removed serviceType dependency
+
+    async function fetchMinistries() {
+        const { data } = await supabase.from('ministries').select('name').order('name')
+        if (data) setMinistries(data.map(m => m.name))
+    }
 
     async function fetchMembersAndAttendance() {
         try {
@@ -36,7 +43,7 @@ export default function ServiceAttendance({ onBack }) {
                 .from('member_attendance')
                 .select('member_id, status')
                 .eq('date', selectedDate)
-                .eq('service_type', serviceType)
+                .eq('service_type', 'MORNING_SERVICE') // Default fixed
                 .eq('status', 'PRESENT')
 
             if (attendanceError) throw attendanceError
@@ -69,7 +76,7 @@ export default function ServiceAttendance({ onBack }) {
                 await supabase.from('member_attendance').insert({
                     member_id: member.id,
                     date: selectedDate,
-                    service_type: serviceType,
+                    service_type: 'MORNING_SERVICE',
                     status: 'PRESENT'
                 })
             } else {
@@ -77,7 +84,7 @@ export default function ServiceAttendance({ onBack }) {
                 await supabase.from('member_attendance').delete()
                     .eq('member_id', member.id)
                     .eq('date', selectedDate)
-                    .eq('service_type', serviceType)
+                    .eq('service_type', 'MORNING_SERVICE')
             }
         } catch (e) {
             console.error(e)
@@ -99,33 +106,37 @@ export default function ServiceAttendance({ onBack }) {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button onClick={onBack} className="back-btn"><ArrowLeft size={24} /></button>
-                        <h2>Check-In</h2>
+                        <h2>Attendance</h2>
                     </div>
                     <div style={{ background: '#ECFDF5', color: '#059669', padding: '6px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Users size={16} /> {totalPresent} Present
                     </div>
                 </div>
 
-                {/* Controls */}
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ flex: 1 }}>
-                        <input
-                            type="date"
-                            className="input"
-                            value={selectedDate}
-                            onChange={e => setSelectedDate(e.target.value)}
-                        />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <select
-                            className="input"
-                            value={serviceType}
-                            onChange={e => setServiceType(e.target.value)}
-                        >
-                            <option value="MORNING_SERVICE">🌞 Morning</option>
-                            <option value="EVENING_SERVICE">🌙 Evening</option>
-                            <option value="SPECIAL_EVENT">🎉 Special</option>
-                        </select>
+                {/* Controls - Date Only */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDateLocked ? 'transparent' : '#fff', borderRadius: '8px', padding: '4px' }}>
+                        {isDateLocked ? (
+                            <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}
+                                <button onClick={() => setIsDateLocked(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}>
+                                    <Lock size={16} />
+                                </button>
+                            </h3>
+                        ) : (
+                            <>
+                                <input
+                                    type="date"
+                                    className="input"
+                                    value={selectedDate}
+                                    onChange={e => setSelectedDate(e.target.value)}
+                                    autoFocus
+                                />
+                                <button onClick={() => setIsDateLocked(true)} className="btn primary" style={{ padding: '8px' }}>
+                                    <Unlock size={18} />
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
@@ -140,8 +151,7 @@ export default function ServiceAttendance({ onBack }) {
                     <div
                         key={m.id}
                         className="student-card"
-                        onClick={() => toggleAttendance(m)}
-                        style={{ cursor: 'pointer' }}
+                    // Removed onClick from here
                     >
                         <div className="student-info">
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
@@ -152,7 +162,11 @@ export default function ServiceAttendance({ onBack }) {
                             </h3>
                         </div>
 
-                        <div className={`check-btn ${m.present ? 'active' : ''}`}>
+                        <div
+                            className={`check-btn ${m.present ? 'active' : ''}`}
+                            onClick={() => toggleAttendance(m)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <CheckCircle size={24} fill={m.present ? 'white' : 'none'} color={m.present ? 'white' : 'var(--border-color)'} />
                         </div>
                     </div>

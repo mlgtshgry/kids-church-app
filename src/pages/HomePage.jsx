@@ -11,6 +11,7 @@ export default function HomePage({ onNavigate }) {
     const { user, logout } = useAuth()
     const [showScanner, setShowScanner] = useState(false)
     const [scannedStudent, setScannedStudent] = useState(null)
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN'
 
     useEffect(() => {
         if (showScanner) {
@@ -83,6 +84,11 @@ export default function HomePage({ onNavigate }) {
 
             <header className="home-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px' }}>
                 <div>
+                    {isSuperAdmin && (
+                        <button onClick={() => onNavigate('super-admin-dashboard')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
+                            <Scan size={16} style={{ rotate: '180deg', display: 'none' }} /> &larr; Back to Hub
+                        </button>
+                    )}
                     <h1>Hello, {user?.username || 'User'}!</h1>
                     <p style={{ fontSize: '12px', opacity: 0.8 }}>{user?.full_name}</p>
                 </div>
@@ -139,17 +145,12 @@ export default function HomePage({ onNavigate }) {
                     <p>Add/Edit Students</p>
                 </button>
 
-                <button className="menu-card" onClick={() => onNavigate('member-manager')}>
-                    <div className="icon-bg" style={{ background: '#E0F2FE', color: '#0284C7' }}><Users size={32} /></div>
-                    <h3>Congregation</h3>
-                    <p>Manage Members</p>
-                </button>
-
-                {user?.role === 'ADMIN' && (
-                    <button className="menu-card" onClick={() => onNavigate('user-manager')}>
+                {/* Kids Staff Management - Visible to Kids Admins & Super Admin */}
+                {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') && (
+                    <button className="menu-card" onClick={() => onNavigate('kids-staff')}>
                         <div className="icon-bg" style={{ background: '#DBEAFE', color: '#2563EB' }}><Shield size={32} /></div>
-                        <h3>Users</h3>
-                        <p>Manage Staff</p>
+                        <h3>Kids Staff</h3>
+                        <p>Manage Teachers</p>
                     </button>
                 )}
             </div>

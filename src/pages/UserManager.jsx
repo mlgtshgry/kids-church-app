@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Trash2, User, Lock, Shield } from 'lucide-react'
+
+import {
+    ArrowLeft, Plus, Trash2, User, Lock, Shield,
+    History, // Icon for Login History
+    KeyRound // Icon for PIN Reset
+} from 'lucide-react'
 import { supabase } from '../supabase'
 import { useAuth } from '../context/AuthContext'
 
-export default function UserManager({ onBack }) {
+export default function UserManager({ onBack, initialTab = 'KIDS', lockedTab = null }) {
     const { user } = useAuth()
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
+
+
+    // Tab State
+    const [activeTab, setActiveTab] = useState(lockedTab || initialTab) // 'KIDS' | 'USHERS'
+
     // Form State
     const [showAdd, setShowAdd] = useState(false)
     const [newName, setNewName] = useState('')
     const [newPin, setNewPin] = useState('')
-    const [newRole, setNewRole] = useState('TEACHER') // TEACHER | ASSISTANT_TEACHER | ADMIN
+    const [newRole, setNewRole] = useState((lockedTab || initialTab) === 'USHERS' ? 'USHER' : 'TEACHER')
     const [newUsername, setNewUsername] = useState('')
+
+    useEffect(() => {
+        // Reset role default when tab changes
+        if (activeTab === 'USHERS') setNewRole('USHER')
+        else setNewRole('TEACHER')
+    }, [activeTab])
+
+    // Force update tab if props change (fix for component reuse)
+    useEffect(() => {
+        if (lockedTab) setActiveTab(lockedTab)
+        else setActiveTab(initialTab)
+    }, [initialTab, lockedTab])
 
     useEffect(() => {
         fetchUsers()
@@ -65,7 +87,7 @@ export default function UserManager({ onBack }) {
     }
 
     // Permission Check
-    const canManage = user?.role === 'ADMIN' || user?.role === 'USHER_ADMIN'
+    const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'USHER_ADMIN'
 
     if (!canManage) {
         return (
@@ -80,24 +102,56 @@ export default function UserManager({ onBack }) {
         )
     }
 
-    // Filter Users based on Role
+    // Filter Users based on Role & Tab
     const visibleUsers = users.filter(u => {
-        if (user.role === 'ADMIN') return true // Admin sees all
-        if (user.role === 'USHER_ADMIN') return u.role === 'USHER' || u.id === user.id // Usher Admin sees Ushers (and self)
+        // First, filter based on active Tab
+        let matchesTab = false
+        if (activeTab === 'KIDS') {
+            matchesTab = ['ADMIN', 'TEACHER', 'ASSISTANT_TEACHER', 'SUPER_ADMIN'].includes(u.role)
+        } else if (activeTab === 'USHERS') {
+            matchesTab = ['USHER_ADMIN', 'USHER', 'SUPER_ADMIN'].includes(u.role)
+        }
+
+        // Then apply Permission Filters
+        if (user.role === 'SUPER_ADMIN') return matchesTab // Super Admin sees whatever is in the tab
+        if (user.role === 'ADMIN') return matchesTab && u.role !== 'SUPER_ADMIN' // Kids Admin sees Kids tab
+        if (user.role === 'USHER_ADMIN') return matchesTab && (u.role === 'USHER' || u.id === user.id) // Usher Admin sees Ushers
+
         return false
     })
 
+    // Reset PIN Logic
+    const handleResetPin = async (userId) => {
+        const newPin = prompt("Enter new 4-6 digit PIN for this user:")
+        if (!newPin) return
+        if (newPin.length < 4) { alert("PIN must be at least 4 digits"); return }
+
+        try {
+            const { error } = await supabase.from('app_users').update({ pin: newPin }).eq('id', userId)
+            if (error) throw error
+            alert("PIN updated successfully.")
+            fetchUsers()
+        } catch (e) { alert(e.message) }
+    }
+
     // Role Options
     const getRoleOptions = () => {
-        if (user.role === 'USHER_ADMIN') {
-            return <option value="USHER">Usher (Service Attendance)</option>
+        // PRIORITY: If lockedTab is USHERS, ALWAYS show Usher options
+        if (lockedTab === 'USHERS' || activeTab === 'USHERS') {
+            return (
+                <>
+                    <option value="USHER">Usher (Service Attendance)</option>
+                    <option value="USHER_ADMIN">Usher Admin (Manage Ushers)</option>
+                </>
+            )
         }
+        // Default to KIDS
         return (
             <>
                 <option value="TEACHER">Teacher (Kids)</option>
                 <option value="ASSISTANT_TEACHER">Assistant (Kids)</option>
-                <option value="ADMIN">Kids Admin (Full Access)</option>
-                <option value="USHER_ADMIN">Usher Admin (Manage Ushers)</option>
+                {/* Only Super Admin creates Admins */}
+                {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') && <option value="ADMIN">Admin (Kids Manager)</option>}
             </>
         )
     }
@@ -109,12 +163,39 @@ export default function UserManager({ onBack }) {
                     <button onClick={onBack} className="back-btn"><ArrowLeft size={24} /></button>
                     <h2>Manage Users</h2>
                 </div>
-                {!showAdd && (
-                    <button onClick={() => setShowAdd(true)} className="btn" style={{ padding: '8px 12px', fontSize: '14px' }}>
-                        <Plus size={18} style={{ marginRight: '4px' }} /> Add User
-                    </button>
-                )}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    {/* Link to Login History if Super Admin */}
+                    {user.role === 'SUPER_ADMIN' && (
+                        <button onClick={() => onNavigate('login-history')} className="btn secondary" style={{ padding: '8px 12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <History size={18} /> Login Logs
+                        </button>
+                    )}
+
+                    {!showAdd && (
+                        <button onClick={() => setShowAdd(true)} className="btn" style={{ padding: '8px 12px', fontSize: '14px' }}>
+                            <Plus size={18} style={{ marginRight: '4px' }} /> Add User
+                        </button>
+                    )}
+                </div>
             </header>
+
+            {/* TABS - Only show if not locked */}
+            {!lockedTab && (
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #E5E7EB' }}>
+                    <button
+                        onClick={() => { setActiveTab('KIDS'); setNewRole('TEACHER'); }}
+                        style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: activeTab === 'KIDS' ? '2px solid var(--primary)' : 'none', fontWeight: activeTab === 'KIDS' ? 'bold' : 'normal', color: activeTab === 'KIDS' ? 'var(--primary)' : '#6B7280' }}
+                    >
+                        Kids Ministry
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('USHERS'); setNewRole('USHER'); }}
+                        style={{ padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: activeTab === 'USHERS' ? '2px solid var(--primary)' : 'none', fontWeight: activeTab === 'USHERS' ? 'bold' : 'normal', color: activeTab === 'USHERS' ? 'var(--primary)' : '#6B7280' }}
+                    >
+                        Ushering Team
+                    </button>
+                </div>
+            )}
 
             {showAdd && (
                 <div className="card" style={{ padding: '20px', marginBottom: '24px', border: '2px solid var(--primary)' }}>
@@ -157,9 +238,18 @@ export default function UserManager({ onBack }) {
                             </div>
                         </div>
                         {u.username !== 'admin' && u.id !== user.id && (
-                            <button onClick={() => handleDelete(u.id)} style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer' }}>
-                                <Trash2 size={20} />
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                {/* Reset PIN Capability */}
+                                {(user.role === 'SUPER_ADMIN' || (user.role === 'ADMIN' && u.role !== 'SUPER_ADMIN')) && (
+                                    <button onClick={() => handleResetPin(u.id)} style={{ background: 'none', border: 'none', color: '#F59E0B', cursor: 'pointer' }} title="Reset PIN">
+                                        <KeyRound size={20} />
+                                    </button>
+                                )}
+
+                                <button onClick={() => handleDelete(u.id)} style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer' }}>
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
                         )}
                     </div>
                 ))}

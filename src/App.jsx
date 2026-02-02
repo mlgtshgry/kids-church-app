@@ -5,6 +5,7 @@ import Splash from './components/Splash'
 // Pages
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
+import SuperAdminDashboard from './pages/SuperAdminDashboard' // Added
 import AttendancePage from './pages/AttendancePage'
 import ActivityLogPage from './pages/ActivityLogPage'
 import FollowUpPage from './pages/FollowUpPage'
@@ -15,6 +16,7 @@ import StudentManager from './pages/StudentManager'
 import UserManager from './pages/UserManager'
 import UsherDashboard from './pages/UsherDashboard'
 import ServiceAttendance from './pages/ServiceAttendance'
+import LoginHistoryPage from './pages/LoginHistoryPage'
 
 import MemberManager from './pages/MemberManager'
 
@@ -86,15 +88,25 @@ function AppRouter() {
 
   // --- ROUTING LOGIC ---
   const isUsher = user.role === 'USHER' || user.role === 'USHER_ADMIN'
+  const isSuperAdmin = user.role === 'SUPER_ADMIN'
 
   // If on home, redirect based on role
-  if (currentPage === 'home' && isUsher) {
-    return <UsherDashboard onNavigate={setCurrentPage} />
+  if (currentPage === 'home') {
+    if (isSuperAdmin) return <SuperAdminDashboard onNavigate={setCurrentPage} />
+    if (isUsher) return <UsherDashboard onNavigate={setCurrentPage} />
   }
 
   switch (currentPage) {
     case 'home':
+      // If we manually navigate to 'home', logic above handles it.
+      // But if we want to force show Kids Dashboard for Super Admin:
       return <HomePage onNavigate={setCurrentPage} />
+
+    case 'super-admin-dashboard':
+      return <SuperAdminDashboard onNavigate={setCurrentPage} />
+
+    case 'usher-dashboard':
+      return <UsherDashboard onNavigate={setCurrentPage} />
 
     // KIDS ROUTES
     case 'attendance':
@@ -114,7 +126,12 @@ function AppRouter() {
 
     // SHARED / ADMIN ROUTES
     case 'user-manager':
-      return <UserManager onBack={() => setCurrentPage('home')} />
+    case 'kids-staff':
+      return <UserManager key="kids-mgr" onBack={() => setCurrentPage('home')} initialTab="KIDS" lockedTab="KIDS" />
+    case 'usher-team':
+      return <UserManager key="usher-mgr" onBack={() => setCurrentPage('home')} initialTab="USHERS" lockedTab="USHERS" />
+    case 'login-history':
+      return <LoginHistoryPage onBack={() => setCurrentPage('user-manager')} />
 
     // USHER ROUTES (New)
     case 'service-attendance':

@@ -102,9 +102,7 @@ export default function LoginPage() {
                     {isLoggingIn ? 'Verifying...' : 'Login'} <ArrowRight size={20} />
                 </button>
 
-                <p style={{ marginTop: '24px', fontSize: '12px', color: '#9CA3AF' }}>
-                    Default PINs: Admin 1234, Teacher 1111, Asst 2222
-                </p>
+
 
             </div>
         </div>

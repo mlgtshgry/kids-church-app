@@ -12,6 +12,7 @@ function MemberForm({ onBack, onComplete, initialData, canDelete }) {
     const [contactNumber, setContactNumber] = useState(initialData?.contact_number || '')
     const [address, setAddress] = useState(initialData?.address || '')
     const [ministry, setMinistry] = useState(initialData?.ministry || '')
+    const [ministries, setMinistries] = useState([])
     const [allergies, setAllergies] = useState(initialData?.allergies || '')
     const [firstVisit, setFirstVisit] = useState(initialData?.first_visit_date || new Date().toISOString().split('T')[0])
 
@@ -35,6 +36,28 @@ function MemberForm({ onBack, onComplete, initialData, canDelete }) {
     }
 
     const age = calculateAge(birthday)
+
+    useEffect(() => {
+        fetchMinistries()
+    }, [])
+
+    async function fetchMinistries() {
+        const { data } = await supabase.from('ministries').select('name').order('name')
+        if (data) setMinistries(data.map(m => m.name))
+    }
+
+    const handleAddMinistry = async () => {
+        const newMinistry = prompt("Enter new Ministry Name:")
+        if (!newMinistry) return
+
+        const { error } = await supabase.from('ministries').insert({ name: newMinistry })
+        if (error) {
+            alert("Error adding ministry: " + error.message)
+        } else {
+            fetchMinistries()
+            setMinistry(newMinistry) // Auto select
+        }
+    }
 
     // Image Upload Logic with Resizing
     const handleImageUpload = async (e) => {
@@ -206,8 +229,15 @@ function MemberForm({ onBack, onComplete, initialData, canDelete }) {
                 </div>
 
                 <div className="form-group">
-                    <label>Ministry / Department</label>
-                    <input type="text" className="input" placeholder="e.g. Music, Ushering, None" value={ministry} onChange={e => setMinistry(e.target.value)} />
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        Ministry / Department
+                        <button type="button" onClick={handleAddMinistry} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>+ Add New</button>
+                    </label>
+                    <select className="input" value={ministry} onChange={e => setMinistry(e.target.value)}>
+                        <option value="">Select Ministry...</option>
+                        {ministries.map(m => <option key={m} value={m}>{m}</option>)}
+                        <option value="None">None</option>
+                    </select>
                 </div>
 
                 <div className="form-group">

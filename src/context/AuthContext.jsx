@@ -53,6 +53,13 @@ export function AuthProvider({ children }) {
                 localStorage.removeItem('app_user')
             }
 
+            // 4. Log the Login
+            await supabase.from('login_logs').insert({
+                user_id: data.id,
+                full_name: data.full_name,
+                role: data.role
+            })
+
             return { success: true }
         } catch (err) {
             return { success: false, error: err.message }
@@ -65,9 +72,9 @@ export function AuthProvider({ children }) {
     }
 
     // Helper permissions
-    const canEditStudents = user && (user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'ASSISTANT_TEACHER')
-    const canDeleteStudents = user && (user.role === 'ADMIN')
-    const canUnlockAttendance = user && (user.role === 'ADMIN' || user.role === 'TEACHER')
+    const canEditStudents = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'ASSISTANT_TEACHER')
+    const canDeleteStudents = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN')
+    const canUnlockAttendance = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'TEACHER')
 
     const value = {
         user,

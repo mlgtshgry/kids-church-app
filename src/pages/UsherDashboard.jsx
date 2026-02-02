@@ -9,6 +9,11 @@ export default function UsherDashboard({ onNavigate }) {
         <div className="page fade-in">
             <header className="home-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #E5E7EB', marginBottom: '24px' }}>
                 <div>
+                    {user?.role === 'SUPER_ADMIN' && (
+                        <button onClick={() => onNavigate('super-admin-dashboard')} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
+                            &larr; Back to Hub
+                        </button>
+                    )}
                     <h1 style={{ fontSize: '24px', color: '#111827' }}>Usher Team</h1>
                     <p style={{ fontSize: '14px', color: '#6B7280' }}>{user?.full_name} ({user?.role})</p>
                 </div>
@@ -45,7 +50,7 @@ export default function UsherDashboard({ onNavigate }) {
                 </button>
 
                 {user?.role === 'USHER_ADMIN' && (
-                    <button className="menu-card" onClick={() => onNavigate('user-manager')} style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center', gap: '12px', aspectRatio: '1/1' }}>
+                    <button className="menu-card" onClick={() => onNavigate('usher-team')} style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center', gap: '12px', aspectRatio: '1/1' }}>
                         <div className="icon-bg" style={{ background: 'transparent', color: '#2563EB', marginBottom: '8px' }}><Shield size={40} /></div>
                         <div>
                             <h3 style={{ fontSize: '16px', marginBottom: '4px' }}>Manage Ushers</h3>

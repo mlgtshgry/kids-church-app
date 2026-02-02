@@ -56,8 +56,8 @@ export default function Splash({ onFinish }) {
                     className="splash-logo"
                     style={{ width: '120px', height: '120px', borderRadius: '20px', marginBottom: '16px', objectFit: 'cover' }}
                 />
-                <h1 className="splash-title">Kid's Church</h1>
-                <p className="splash-text">Attendance</p>
+                <h1 className="splash-title">CityPraise</h1>
+                <p className="splash-text">Connect</p>
 
                 {showRes && (
                     <button
