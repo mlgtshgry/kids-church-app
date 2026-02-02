@@ -15,6 +15,7 @@ import StudentManager from './pages/StudentManager'
 import UserManager from './pages/UserManager'
 import UsherDashboard from './pages/UsherDashboard'
 import ServiceAttendance from './pages/ServiceAttendance'
+
 import MemberManager from './pages/MemberManager'
 
 import './gamification.css'

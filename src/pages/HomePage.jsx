@@ -139,6 +139,12 @@ export default function HomePage({ onNavigate }) {
                     <p>Add/Edit Students</p>
                 </button>
 
+                <button className="menu-card" onClick={() => onNavigate('member-manager')}>
+                    <div className="icon-bg" style={{ background: '#E0F2FE', color: '#0284C7' }}><Users size={32} /></div>
+                    <h3>Congregation</h3>
+                    <p>Manage Members</p>
+                </button>
+
                 {user?.role === 'ADMIN' && (
                     <button className="menu-card" onClick={() => onNavigate('user-manager')}>
                         <div className="icon-bg" style={{ background: '#DBEAFE', color: '#2563EB' }}><Shield size={32} /></div>
