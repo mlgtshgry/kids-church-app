@@ -11,11 +11,28 @@ function StudentForm({ onBack, onComplete, initialData, canDelete }) {
     const [nickname, setNickname] = useState(initialData?.nickname || '')
     const [gender, setGender] = useState(initialData?.gender || 'Male')
     const [birthday, setBirthday] = useState(initialData?.birthday || '')
+    const [allergies, setAllergies] = useState(initialData?.allergies || '')
+    const [firstVisit, setFirstVisit] = useState(initialData?.first_visit_date || new Date().toISOString().split('T')[0])
     const [loading, setLoading] = useState(false)
     const isEdit = !!initialData
 
     const [avatarUrl, setAvatarUrl] = useState(initialData?.avatar_url || '')
     const [uploading, setUploading] = useState(false)
+
+    // Helper: Compute Age
+    const calculateAge = (dob) => {
+        if (!dob) return ''
+        const birthDate = new Date(dob)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age
+    }
+
+    const age = calculateAge(birthday)
 
     // Image Upload Logic with Resizing
     const handleImageUpload = async (e) => {
@@ -80,6 +97,8 @@ function StudentForm({ onBack, onComplete, initialData, canDelete }) {
             gender: gender,
             nickname: nickname,
             birthday: birthday || null,
+            allergies: allergies || null,
+            first_visit_date: firstVisit,
             avatar_url: avatarUrl
         }
 
@@ -153,7 +172,31 @@ function StudentForm({ onBack, onComplete, initialData, canDelete }) {
 
                 <div className="form-group">
                     <label>Birthday (Optional)</label>
-                    <input type="date" className="input" value={birthday} onChange={e => setBirthday(e.target.value)} />
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <input type="date" className="input" value={birthday} onChange={e => setBirthday(e.target.value)} style={{ flex: 1 }} />
+                        {age !== '' && (
+                            <div style={{ background: '#EFF6FF', color: '#2563EB', padding: '8px 12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                                {age} yrs old
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <label>First Day of Visit</label>
+                    <input type="date" className="input" value={firstVisit} onChange={e => setFirstVisit(e.target.value)} />
+                </div>
+
+                <div className="form-group">
+                    <label>Allergies / Medical Notes</label>
+                    <textarea
+                        className="input"
+                        placeholder="e.g. Peanuts, Asthma, etc."
+                        value={allergies}
+                        onChange={e => setAllergies(e.target.value)}
+                        rows={3}
+                        style={{ resize: 'vertical' }}
+                    />
                 </div>
 
                 <div className="form-group">
